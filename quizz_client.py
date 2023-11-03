@@ -36,3 +36,47 @@ while True:
 
 client_socket.close()
 
+threading.Thread(target=receive_messages, args=(client, text_widget), daemon=True).start()
+
+
+import threading
+import sys
+import time
+
+# Global variable to store the user's answer
+user_answer = None
+
+# Function to get user input
+def get_user_input():
+    global user_answer
+    user_answer = input("Your answer: ")
+
+# Function to handle timer
+def timer():
+    global user_answer
+    time.sleep(30)  # Wait for 30 seconds
+    if user_answer is None:
+        user_answer = "No answer provided within the time limit."
+
+# Main function to receive and process questions
+def receive_question():
+    while True:
+        question = client.recv(1024).decode()
+        if not question:
+            break
+        print(f"Question: {question}")
+
+        # Start the timer and prompt user for answer
+        timer_thread = threading.Thread(target=timer)
+        timer_thread.start()
+        get_user_input()
+
+        # Wait for the timer thread to finish (maximum 30 seconds)
+        timer_thread.join()
+
+        # Send user's answer to the server
+        client.send(user_answer.encode())
+
+        # Receive and print feedback from the server
+        feedback = client.recv(1024).decode()
+        print(feedback)
