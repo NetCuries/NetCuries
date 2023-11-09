@@ -6,77 +6,46 @@ Created on Sat Oct 28 17:45:11 2023
 """
 
 from socket import *
-import sys
-import select
+import threading
 
-server_name = "192.168.50.147"
+def listen_for_questions():
+    while True:
+        
+        #welcome message
+        welcome = client_socket.recv(1024).decode()
+        print(welcome)
+        
+        # Receive a question from the server
+        questions_options = client_socket.recv(1024).decode()
+        print(questions_options)
+
+        # Get the user's answer
+        answer = input("Enter you answer: \n")
+
+        # Send the user's answer to the server
+        client_socket.send(answer.encode())
+
+        # Receive correct answer from the server 
+        correct_answer = client_socket.recv(1024).decode()
+        print(correct_answer)
+            
+server_name = "192.168.1.192"
 server_port = 12222 #enter the server port
 
 client_socket = socket(AF_INET,SOCK_STREAM)
-
 client_socket.connect((server_name,server_port))
 
 print("Connection to server successful")
 
-#Send the unique username
+#Send the unique username to the server
 username = input("username:")
 client_socket.send(username.encode())
 
-
-while True:
-    # Receive the questions and options from the server
-    questions_options = client_socket.recv(1024)
-    print(questions_options.decode())  
-    
-    answer = input()
-    # Receive the score from the server
-    score = client_socket.recv(1024)
-    print("The score", score.decode())  # Decode the received score before printing
-    
-
+# Start a new thread to listen for questions from the server
+thread = threading.Thread(target=listen_for_questions)
+thread.start()
 client_socket.close()
 
-threading.Thread(target=receive_messages, args=(client, text_widget), daemon=True).start()
 
 
-import threading
-import sys
-import time
 
-# Global variable to store the user's answer
-user_answer = None
-
-# Function to get user input
-def get_user_input():
-    global user_answer
-    user_answer = input("Your answer: ")
-
-# Function to handle timer
-def timer():
-    global user_answer
-    time.sleep(30)  # Wait for 30 seconds
-    if user_answer is None:
-        user_answer = "No answer provided within the time limit."
-
-# Main function to receive and process questions
-def receive_question():
-    while True:
-        question = client.recv(1024).decode()
-        if not question:
-            break
-        print(f"Question: {question}")
-
-        # Start the timer and prompt user for answer
-        timer_thread = threading.Thread(target=timer)
-        timer_thread.start()
-        get_user_input()
-
-        # Wait for the timer thread to finish (maximum 30 seconds)
-        timer_thread.join()
-
-        # Send user's answer to the server
-        client.send(user_answer.encode())
-
-        # Receive and print feedback from the server
-        feedback = client.recv(1024).decode()
-        print(feedback)
