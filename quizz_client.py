@@ -26,37 +26,35 @@ username = input("username:")
 client_socket.send(username.encode())
 
 def inp():
-  global start_time,answer
-  answer="NO_ANSWER"
-  start_time = time.time()
-  answer = input("Your answer (A/B/C/D: ")
+    global answer
+    answer="NO_ANSWER"
+    prompt = input("Your answer (A/B/C/D) : \n")
+    if prompt in ["A","B","C","D"] : answer = prompt
 
 def timer():
-    global t1
-    sec = 10
-    while True:
-        passed = time.time() - start_time
-        
-        if passed > sec :
-            print("Time's up! \n")
-            client_socket.send(answer.encode())
-            os.kill(t1.ident, signal.SIGINT)  # Send a SIGINT signal to terminate the process
+    global timeup 
+    timeup = False
+    time.sleep(10)
+    if (answer =="NO_ANSWER") :
+       print("Time's up! \n PRESS ENTER \n")
+       timeup = True
 
-
-
-        
+    
 while True:
+    global answer
+    answer="NO_ANSWER"
     # Receive the questions and options from the server
     questions_options = client_socket.recv(1024)
     print(questions_options.decode())  
     t2 = Thread(target=timer)
-    t1 = Thread(target=inp)
-    t1.start()
     t2.start()
+    prompt = input("Your answer (A/B/C/D) : \n")
+    if prompt in ["A","B","C","D"] and not timeup : answer = prompt
     t2.join()
+    client_socket.send(answer.encode())
     # Receive the score from the server
     comment = client_socket.recv(1024)
-    print(comment.decode())  
+    print('Wrong Answer! \n The correct answer is ',comment.decode(),' \n')  
     score = client_socket.recv(1024)
     print("The score", score.decode())  # Decode the received score before printing
     

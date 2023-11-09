@@ -36,13 +36,15 @@ def handle_client(client_socket,username):
             print(client_answer)
             if client_answer != "NO_ANSWER":
                 correct_answer = current_question['correct_answer']
+                print('assign',correct_answer)
+                print (type(correct_answer), type(client_answer))
                 if correct_answer == client_answer:
                     scores[username]=scores.get(username,0)+1
                     client_socket.send('Correct! \n'.encode())
                 else:
-                     client_socket.send('Wrong Answer! \n The correct answer is : {correct_answer} \n'.encode())
+                     client_socket.send(correct_answer.encode())
             else:
-                client_socket.send("time over! better luck next time.\n".encode())
+                client_socket.send("better luck next time.\n".encode())
 
             client_socket.send(f'Score: {scores.get(username, 0)}\n'.encode())
             questions.remove(current_question)
