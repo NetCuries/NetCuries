@@ -34,13 +34,13 @@ def handle_client(client_socket,username):
             client_socket.send(f'Question: {question_text}\n{options}\n'.encode())
             client_answer = client_socket.recv(1024).decode().strip().upper()
             print(client_answer)
-            if client_answer != "":
+            if client_answer != "NO_ANSWER":
                 correct_answer = current_question['correct_answer']
                 if correct_answer == client_answer:
                     scores[username]=scores.get(username,0)+1
                     client_socket.send('Correct! \n'.encode())
                 else:
-                     client_socket.send('Wrong Answer! \n The correct answer is : {correct_answer}\n'.encode())
+                     client_socket.send('Wrong Answer! \n The correct answer is : {correct_answer} \n'.encode())
             else:
                 client_socket.send("time over! better luck next time.\n".encode())
 
@@ -52,7 +52,7 @@ def handle_client(client_socket,username):
         client_socket.close()
 
 
-host = ''
+host = '127.0.0.1'
 port = 12222
 sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM) #TCP 
 sock.bind((host,port))
