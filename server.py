@@ -42,7 +42,7 @@ def handle_client(client_socket,username):
                     scores[username]=scores.get(username,0)+1
                     client_socket.send('Correct! \n'.encode())
                 else:
-                     client_socket.send(correct_answer.encode())
+                     client_socket.send(f'Wrong Answer! \nThe correct answer is {correct_answer} \n'.encode())
             else:
                 client_socket.send("better luck next time.\n".encode())
 

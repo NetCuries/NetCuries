@@ -4,7 +4,7 @@ Created on Sat Oct 28 17:45:11 2023
 
 @author: inesb
 """
-
+import keyboard
 from socket import *
 import sys
 import time 
@@ -36,8 +36,9 @@ def timer():
     timeup = False
     time.sleep(10)
     if (answer =="NO_ANSWER") :
-       print("Time's up! \n PRESS ENTER \n")
+       print("Time's up! \n")
        timeup = True
+       keyboard.press_and_release('enter')
 
     
 while True:
@@ -46,7 +47,7 @@ while True:
     # Receive the questions and options from the server
     questions_options = client_socket.recv(1024)
     print(questions_options.decode())  
-    t2 = Thread(target=timer)
+    t2 = Thread(target=timer ,daemon=True)
     t2.start()
     prompt = input("Your answer (A/B/C/D) : \n")
     if prompt in ["A","B","C","D"] and not timeup : answer = prompt
@@ -54,9 +55,9 @@ while True:
     client_socket.send(answer.encode())
     # Receive the score from the server
     comment = client_socket.recv(1024)
-    print('Wrong Answer! \n The correct answer is ',comment.decode(),' \n')  
+    print(comment.decode())  
     score = client_socket.recv(1024)
-    print("The score", score.decode())  # Decode the received score before printing
+    print(score.decode())  # Decode the received score before printing
     
 
 client_socket.close()
