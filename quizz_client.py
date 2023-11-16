@@ -1,63 +1,35 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Oct 28 17:45:11 2023
+import socket
+import threading
+import time
 
-@author: inesb
-"""
+def receive_messages():
+    while True:
+        try:
+            message = client_socket.recv(1024).decode("utf-8")
+            print(message)
+            if "Question" in message:
+                # If the received message contains "Question," it's a quiz question
+                answer = input("Your answer: ")
+                client_socket.send(answer.encode("utf-8"))
+        except socket.error as e:
+            print(str(e))
+            break
 
-from socket import *
-import sys
-import time 
-from threading import Thread
-import os
-import signal
+# Connect to the server
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect(("192.168.238.6", 12222))
 
-server_name = '127.0.0.1'
-server_port = 12222 #enter the server port
+# Provide a unique username
+username = input("Enter your username: ")
+client_socket.send(username.encode("utf-8"))
 
-client_socket = socket(AF_INET,SOCK_STREAM)
+# Start receiving thread
+receive_thread = threading.Thread(target=receive_messages)
+receive_thread.start()
 
-client_socket.connect((server_name,server_port))
+# Add a delay to ensure the client has time to connect before the server starts broadcasting questions
+time.sleep(2)
 
-print("Connection to server successful")
-
-#Send the unique username
-username = input("username:")
-client_socket.send(username.encode())
-
-def inp():
-    global answer
-    answer="NO_ANSWER"
-    prompt = input("Your answer (A/B/C/D) : \n")
-    if prompt in ["A","B","C","D"] : answer = prompt
-
-def timer():
-    global timeup 
-    timeup = False
-    time.sleep(10)
-    if (answer =="NO_ANSWER") :
-       print("Time's up! \n PRESS ENTER \n")
-       timeup = True
-
-    
+# Start an infinite loop to keep the client running
 while True:
-    global answer
-    answer="NO_ANSWER"
-    # Receive the questions and options from the server
-    questions_options = client_socket.recv(1024)
-    print(questions_options.decode())  
-    t2 = Thread(target=timer)
-    t2.start()
-    prompt = input("Your answer (A/B/C/D) : \n")
-    if prompt in ["A","B","C","D"] and not timeup : answer = prompt
-    t2.join()
-    client_socket.send(answer.encode())
-    # Receive the score from the server
-    comment = client_socket.recv(1024)
-    print('Wrong Answer! \n The correct answer is ',comment.decode(),' \n')  
-    score = client_socket.recv(1024)
-    print("The score", score.decode())  # Decode the received score before printing
-    
-
-client_socket.close()
-
+    pass
