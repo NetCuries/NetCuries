@@ -45,6 +45,5 @@ while True:
     score = client_socket.recv(1024)
     print("The score", score.decode())  
     
-"""git config --global user.email "you@example.com"
-  git config --global user.name "Your Name" """
+
 client_socket.close()
