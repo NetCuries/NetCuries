@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Oct 28 17:45:11 2023
-
-@author: inesb
-"""
-
 from socket import *
+import keyboard
 import sys
-import select
+import time 
+from threading import Thread
+import os
+import signal
 
-server_name = "192.168.50.147"
-server_port = 12222 #enter the server port
+server_name = '127.0.0.1'
+server_port = 12222 
 
 client_socket = socket(AF_INET,SOCK_STREAM)
 
@@ -18,21 +15,36 @@ client_socket.connect((server_name,server_port))
 
 print("Connection to server successful")
 
-#Send the unique username
 username = input("username:")
 client_socket.send(username.encode())
 
+def press_enter():
+    time.sleep(10)
+    answer = "NO_ANSWER"  
+    keyboard.press_and_release('enter')
 
+def get_user_input():
+    global answer
+    answer = input("Please enter something: ")
+
+    
 while True:
-    # Receive the questions and options from the server
+    global answer
+    answer="NO_ANSWER"
     questions_options = client_socket.recv(1024)
-    print(questions_options.decode())  
-    
-    answer = input()
-    # Receive the score from the server
+    print(questions_options.decode()) 
+    press_thread = Thread(target=press_enter)
+    get_input_thread = Thread(target=get_user_input)
+    press_thread.start()
+    get_input_thread.start()
+    press_thread.join()
+    get_input_thread.join()
+    client_socket.send(answer.encode())
+    comment = client_socket.recv(1024)
+    print('Wrong Answer! \n The correct answer is ',comment.decode(),' \n')  
     score = client_socket.recv(1024)
-    print("The score", score.decode())  # Decode the received score before printing
+    print("The score", score.decode())  
     
-
+"""git config --global user.email "you@example.com"
+  git config --global user.name "Your Name" """
 client_socket.close()
-

@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Oct 28 11:55:27 2023
-
-@author: chaar
-"""
 import socket
 import time 
 import random
